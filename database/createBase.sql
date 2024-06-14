@@ -71,8 +71,8 @@ CREATE TABLE Cliente (
     membresia_id INT NOT NULL,
     tabla_precios_id INT NOT NULL,
     medio_pago_id INT NOT NULL,
-    fecha_ini_memb DATE NOT NULL,
-    fecha_fin_memb DATE NOT NULL,
+    fecha_ini_memb DATE,
+    fecha_fin_memb DATE,
     estado CHAR(1) NOT NULL,
     fecha_insercion DATETIME NOT NULL,
     fecha_modificacion DATETIME NULL,
@@ -141,15 +141,14 @@ CREATE TABLE Pago (
     usuario_insercion INT NOT NULL,
     usuario_modificacion INT NULL,
     FOREIGN KEY (cliente_id) REFERENCES Cliente(cliente_id),
-    FOREIGN KEY (membresia_id) REFERENCES Membresia(membresia_id),
-    FOREIGN KEY (cod_medio_pago) REFERENCES MedioPago(codigo)
+    FOREIGN KEY (membresia_id) REFERENCES Membresia(membresia_id)
 );
 
 CREATE TABLE Campania (
     campania_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     nombre CHAR(50) NOT NULL,
-    fecha_ini DATE NOT NULL,
-    fecha_fin DATE NOT NULL,
+    fecha_ini DATE,
+    fecha_fin DATE,
     activo BOOLEAN NOT NULL,
     cliente_id INT,
     estado CHAR(1) NOT NULL,
