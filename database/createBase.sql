@@ -150,7 +150,7 @@ CREATE TABLE Campania (
     fecha_ini DATE,
     fecha_fin DATE,
     activo BOOLEAN NOT NULL,
-    cliente_id INT,
+    cliente_id INT NOT NULL,
     estado CHAR(1) NOT NULL,
     fecha_insercion DATETIME NOT NULL,
     fecha_modificacion DATETIME NULL,

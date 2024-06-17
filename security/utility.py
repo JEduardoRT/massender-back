@@ -1,9 +1,11 @@
 from typing import Annotated
-from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi import Depends, HTTPException, Security, status
+from fastapi.security import OAuth2PasswordBearer, SecurityScopes
 from passlib.context import CryptContext
 from datetime import datetime, timedelta, timezone
-from security.token import TokenData, User, UserInDB
+
+from pydantic import ValidationError
+from security.token import Rol, TokenData, User, UserInDB
 from utils.constants import SECRET_KEY, ALGORITHM
 from jose import JWTError, jwt
 
@@ -14,10 +16,19 @@ fake_users_db = {
         "email": "johndoe@example.com",
         "hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",
         "disabled": False,
+    },
+    "admin": {
+        "username": "admin",
+        "full_name": "Admin",
+        "email": "admin@example.com",
+        "hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",
+        "disabled": False,
     }
 }
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+fake_roles_db = {"johndoe": {"scopes":["user"]}, "admin": {"scopes":["admin","user"]}}
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", scopes={"admin": "Acceso administrativo", "user": "Acceso usuarios de los clientes"})
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def verify_password(plain_password, hashed_password):
@@ -31,11 +42,20 @@ def get_user(db, username: str):
         user_dict = db[username]
         return UserInDB(**user_dict)
     
+def get_rol(db, username: str):
+    if username in db:
+        rol = db[username]
+        return Rol(**rol)
+    
 def authenticate_user(username: str, password: str):
     user = get_user(fake_users_db, username)
     if not user:
         return False
     if not verify_password(password, user.hashed_password):
+        return False
+    user.rol = get_rol(fake_roles_db,username)
+    print(user.rol)
+    if not user.rol:
         return False
     return user
 
@@ -49,28 +69,40 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
+async def get_current_user(security_scopes: SecurityScopes, token: Annotated[str, Depends(oauth2_scheme)]):
+    if security_scopes.scopes:
+        authenticate_value = f'Bearer scope="{security_scopes.scope_str}"'
+    else:
+        authenticate_value = "Bearer"
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
+        headers={"WWW-Authenticate": authenticate_value},
     )
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         if username is None:
             raise credentials_exception
-        token_data = TokenData(username=username)
-    except JWTError:
+        token_scopes = payload.get("scopes", [])
+        token_data = TokenData(scopes=token_scopes, username=username)
+    except (JWTError, ValidationError):
         raise credentials_exception
     user = get_user(fake_users_db, username=token_data.username)
     if user is None:
         raise credentials_exception
+    for scope in security_scopes.scopes:
+        if scope not in token_data.scopes:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Not enough permissions",
+                headers={"WWW-Authenticate": authenticate_value},
+            )
     return user
 
 
 async def get_current_active_user(
-    current_user: Annotated[User, Depends(get_current_user)],
+    current_user: Annotated[User, Security(get_current_user, scopes=["user"])],
 ):
     if current_user.disabled:
         raise HTTPException(status_code=400, detail="Inactive user")
