@@ -1,6 +1,6 @@
 from typing import Annotated
 from fastapi import Depends, HTTPException, Security, status
-from fastapi.security import OAuth2PasswordBearer, SecurityScopes
+from fastapi.security import OAuth2AuthorizationCodeBearer, OAuth2PasswordBearer, SecurityScopes
 from passlib.context import CryptContext
 from datetime import datetime, timedelta, timezone
 
@@ -28,7 +28,7 @@ fake_users_db = {
 
 fake_roles_db = {"johndoe": {"scopes":["user"]}, "admin": {"scopes":["admin","user"]}}
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", scopes={"admin": "Acceso administrativo", "user": "Acceso usuarios de los clientes"})
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", scopes={"admin": "Acceso administrativo", "user": "Acceso usuarios de los clientes", "refresh": "Scope para refresh token"})
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def verify_password(plain_password, hashed_password):
@@ -59,7 +59,7 @@ def authenticate_user(username: str, password: str):
         return False
     return user
 
-def create_access_token(data: dict, expires_delta: timedelta | None = None):
+def create_token(data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
@@ -107,3 +107,34 @@ async def get_current_active_user(
     if current_user.disabled:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
+
+async def validate_refresh_token(security_scopes: SecurityScopes, token: Annotated[str, Depends(oauth2_scheme)]):
+    if security_scopes.scopes:
+        authenticate_value = f'Bearer scope="{security_scopes.scope_str}"'
+    else:
+        authenticate_value = "Bearer"
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": authenticate_value},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+        token_scopes = payload.get("scopes", [])
+        token_data = TokenData(scopes=token_scopes, username=username)
+    except (JWTError, ValidationError):
+        raise credentials_exception
+    user = get_user(fake_users_db, username=token_data.username)
+    if user is None:
+        raise credentials_exception
+    for scope in security_scopes.scopes:
+        if scope not in token_data.scopes:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Not enough permissions",
+                headers={"WWW-Authenticate": authenticate_value},
+            )
+    return token_data

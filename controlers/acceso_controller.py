@@ -8,7 +8,7 @@ from security.utility import get_current_active_user
 
 router = APIRouter(tags=["Accesos"])
 
-@router.post("/accesos/")
+@router.post("/accesos")
 def create_acceso(acceso: Acceso, current_user: Annotated[User, Security(get_current_active_user)]):
     pass
 
@@ -16,11 +16,15 @@ def create_acceso(acceso: Acceso, current_user: Annotated[User, Security(get_cur
 def read_acceso(current_user: Annotated[User, Security(get_current_active_user)], acceso_id: int):
     pass
 
-@router.get("/accesos/", response_model=List[Acceso])
-def read_accesos(current_user: Annotated[User, Security(get_current_active_user)], skip: int = 0, limit: int = 10):
+@router.get("/accesos", response_model=List[Acceso])
+def read_accesos(current_user: Annotated[User, Security(get_current_active_user, scopes=["admin"])]):
     pass
 
-@router.put("/accesos/")
+@router.get("/accesos/byrol/{rol_id}", response_model=List[Acceso])
+def read_accesos(current_user: Annotated[User, Security(get_current_active_user)], rol_id: int, skip: int = 0, limit: int = 10):
+    pass
+
+@router.put("/accesos")
 def update_acceso(acceso: Acceso, current_user: Annotated[User, Security(get_current_active_user)]):
     pass
 

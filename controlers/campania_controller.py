@@ -8,7 +8,7 @@ from security.utility import get_current_active_user
 
 router = APIRouter(tags=["Campañas"])
 
-@router.post("/campanias/")
+@router.post("/campanias")
 def create_campania(campania: Campania, current_user: Annotated[User, Security(get_current_active_user)]):
     pass
 
@@ -16,11 +16,11 @@ def create_campania(campania: Campania, current_user: Annotated[User, Security(g
 def read_campania(current_user: Annotated[User, Security(get_current_active_user)], campania_id: int):
     pass
 
-@router.get("/campanias/", response_model=List[Campania])
+@router.get("/campanias", response_model=List[Campania])
 def read_campanias(current_user: Annotated[User, Security(get_current_active_user)], skip: int = 0, limit: int = 10):
     pass
 
-@router.put("/campanias/")
+@router.put("/campanias")
 def update_campania(campania: Campania, current_user: Annotated[User, Security(get_current_active_user)]):
     pass
 
