@@ -1,10 +1,12 @@
-from pydantic import BaseModel, Field
-from datetime import datetime, date
-from typing import Optional
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, CHAR, VARCHAR
+from sqlalchemy.ext.declarative import declarative_base
+from datetime import datetime
+from config.db import engine, Base
 
-from models.base import MassenderBase
 
-class ListaDestinatarios(MassenderBase):
-    lista_destinatarios_id: Optional[int]
-    nombre: Optional[str] = Field(..., max_length=50)
-    cliente_id: Optional[int]
+class ListaDestinatarios(Base):
+    __tablename__ = "ListaDestinatarios"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    nombre = Column(CHAR(50), nullable=False)
+    estado = Column(CHAR(1), nullable=False)
+    fecha_modificacion = Column(DateTime, default=datetime.utcnow)
