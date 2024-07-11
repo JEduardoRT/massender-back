@@ -1,13 +1,19 @@
-from pydantic import Field
-from datetime import date
-from typing import Optional
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text
+from sqlalchemy.orm import relationship
+from datetime import datetime
+from config.db import Base
 
-from models.base import MassenderBase
+class Campania(Base):
+    __tablename__ = 'campania'
 
-class Campania(MassenderBase):
-    campania_id: Optional[int]
-    nombre: Optional[str] = Field(..., max_length=50)
-    fecha_ini: Optional[date]
-    fecha_fin: Optional[date]
-    activo: Optional[bool]
-    cliente_id: Optional[int]
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    nombre = Column(String(255))
+    mensaje = Column(Text)
+    filtro_id = Column(Integer, ForeignKey('filtros.id'))
+    lista_id = Column(Integer, ForeignKey('lista_destinatarios.id'))
+    fecha_creacion = Column(DateTime, default=datetime.utcnow)
+    estado = Column(String(50), default='A')
+
+    # Relaciones
+    filtro = relationship("Filtro", back_populates="campanias")
+    lista = relationship("ListaDestinatarios", back_populates="campanias")
