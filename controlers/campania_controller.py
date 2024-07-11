@@ -10,7 +10,7 @@ from config.db import get_db
 from pydantic import BaseModel
 from typing import List, Optional
 
-from services.send_email import send_email
+from services.send_email import enviar_correo
 
 router = APIRouter()
 
@@ -51,10 +51,19 @@ async def guardar_campania(campania: CampaniaCreate, db: Session = Depends(get_d
         db.commit()
         db.refresh(nueva_campania)
 
-        destinatarios = db.query(Destinatario).filter_by(lista_id=campania.lista_id).all()
+        filtro = db.query(Filtro).filter(Filtro.id == campania.filtro_id).first()
+        if not filtro:
+            raise HTTPException(status_code=400, detail="Filtro no encontrado")
+        if filtro.value != "N":
+            destinatarios = db.query(Destinatario).filter_by(lista_id=campania.lista_id, genero=filtro.value).all()
+        else:
+            destinatarios = db.query(Destinatario).filter(lista_id=campania.lista_id).all()
+
         email_list = [destinatario.correo for destinatario in destinatarios]
 
-        send_email(email_list, campania.nombre, campania.mensaje)
+        print(email_list)
+
+        enviar_correo(email_list, campania.nombre, campania.mensaje)
         return nueva_campania
 
     except Exception as e:
