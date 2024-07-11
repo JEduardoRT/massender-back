@@ -10,6 +10,7 @@ meta = MetaData()
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
+conn = engine.connect()
 
 
 def get_db():

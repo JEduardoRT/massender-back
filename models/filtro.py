@@ -1,10 +1,12 @@
 from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import relationship
 from config.db import Base
 
-
-class Filters(Base):
-    __tablename__ = "filtros"
+class Filtro(Base):
+    __tablename__ = 'filtros'
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(45), nullable=False)
-    value = Column(String(45), nullable=False)
+    name = Column(String, index=True)
+    value = Column(String, index=True)
+
+    campanias = relationship("Campania", back_populates="filtro")

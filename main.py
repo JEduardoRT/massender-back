@@ -2,9 +2,11 @@ from fastapi import FastAPI
 import uvicorn
 from starlette.middleware.cors import CORSMiddleware
 
-from controlers.acceso_controller import router as AccesoController
-from controlers.security import router as SecurityController
-from controlers.destinatarios_controller import router as DestinatariosController
+from controlers.acceso_controller import router as acceso_controller
+from controlers.security import router as security_controller
+from controlers.destinatarios_controller import router as destinatarios_controller
+from controlers.dictionaries_controller import router as dictionaries_controller
+from controlers.campania_controller import router as campania_controller
 
 
 app = FastAPI(root_path="/massender")
@@ -24,9 +26,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(AccesoController)
-app.include_router(SecurityController)
-app.include_router(DestinatariosController)
+app.include_router(acceso_controller)
+app.include_router(security_controller)
+app.include_router(destinatarios_controller)
+app.include_router(dictionaries_controller)
+app.include_router(campania_controller)
 
 # this is for DEBUG (comment when launch in prod)
 if __name__ == "__main__":
