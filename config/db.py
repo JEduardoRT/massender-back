@@ -2,7 +2,8 @@ from sqlalchemy import create_engine, MetaData
 from sqlalchemy.orm import sessionmaker, declarative_base
 
 # DATABASE_URL = "mysql+pymysql://root:15022000@localhost:3306/prueba_fastapi"
-DATABASE_URL = "mysql+pymysql://root:QNnWLOhCHwZyHOuPbpzsDKnOwEsolCdF@roundhouse.proxy.rlwy.net:56585/railway"
+DATABASE_URL = "mysql+pymysql://JandryRT15:Oi8Q8QlS7rt@JandryRT15.mysql.pythonanywhere-services.com/JandryRT15$default"
+# DATABASE_URL = "mysql+pymysql://root:QNnWLOhCHwZyHOuPbpzsDKnOwEsolCdF@roundhouse.proxy.rlwy.net:56585/railway"
 # DATABASE_URL = "mysql://root:QNnWLOhCHwZyHOuPbpzsDKnOwEsolCdF@mysql.railway.internal:3306/railway"
 
 engine = create_engine(DATABASE_URL)

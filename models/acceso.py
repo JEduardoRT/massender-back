@@ -5,6 +5,7 @@ from typing import Optional
 from models.base import MassenderBase
 
 class Acceso(MassenderBase):
+    __tablename__ = "Acceso"
     acceso_id: Optional[int]
     ruta: str = Field(..., max_length=100)
     descripcion: str = Field(..., max_length=50)
