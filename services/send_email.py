@@ -21,17 +21,10 @@ def enviar_correo(destinatarios, asunto, mensaje):
     # Adjuntar el mensaje en formato de texto
     msg.attach(MIMEText(mensaje, 'plain'))
 
-    print("antes del try")
-
     try:
         # Conectar al servidor SMTP usando SSL y enviar el correo
         server = smtplib.SMTP_SSL(servidor, puerto)
-        print("1")
         server.login(remitente, password)
-        print("2")
-
-        print("enviando")
-
         # Enviar correo a cada destinatario
         for destinatario in destinatarios:
             msg['To'] = destinatario

@@ -33,5 +33,5 @@ app.include_router(dictionaries_controller)
 app.include_router(campania_controller)
 
 # this is for DEBUG (comment when launch in prod)
-if __name__ == "__main__":
-    uvicorn.run(app, host="localhost", port=8000)
+#if __name__ == "__main__":
+#    uvicorn.run(app, host="localhost", port=8000)
