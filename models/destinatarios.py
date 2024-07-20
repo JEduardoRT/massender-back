@@ -1,8 +1,9 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, CHAR, VARCHAR
 from config.db import engine, Base
+from models.base import MassenderBase
 
 
-class Destinatario(Base):
+class Destinatario(MassenderBase):
     __tablename__ = "destinatario"
     destinatario_id = Column(Integer, primary_key=True, autoincrement=True)
     nombre = Column(CHAR(20), nullable=False)

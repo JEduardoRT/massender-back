@@ -1,9 +1,11 @@
 import re
-from pydantic import BaseModel, EmailStr, Field, validator, field_validator
+from pydantic import EmailStr, Field, field_validator
 from typing import Optional
 
+from models.base import MassenderBase
 
-class DestinatarioRequest(BaseModel):
+
+class DestinatarioRequest(MassenderBase):
     cedula: str = Field(..., max_length=20)
     nombre: str = Field(..., max_length=20)
     apellido: str = Field(..., max_length=20)
