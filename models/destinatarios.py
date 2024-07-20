@@ -13,7 +13,3 @@ class Destinatario(Base):
     estado = Column(CHAR(1), nullable=False)
     genero = Column(CHAR(1), nullable=False)
     cedula = Column(CHAR(20), nullable=False)
-
-
-
-Base.metadata.create_all(bind=engine)
