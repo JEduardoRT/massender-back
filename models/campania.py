@@ -4,7 +4,7 @@ from datetime import datetime
 from config.db import Base
 
 class Campania(Base):
-    __tablename__ = 'campania'
+    __tablename__ = 'campania_list'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     nombre = Column(String(255))
