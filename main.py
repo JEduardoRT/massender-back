@@ -2,6 +2,7 @@ from fastapi import FastAPI
 import uvicorn
 from starlette.middleware.cors import CORSMiddleware
 
+from controlers.rol_controller import router as rol_controller
 from controlers.acceso_controller import router as acceso_controller
 from controlers.security import router as security_controller
 from controlers.destinatarios_controller import router as destinatarios_controller
@@ -26,6 +27,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(rol_controller)
 app.include_router(acceso_controller)
 app.include_router(security_controller)
 app.include_router(destinatarios_controller)

@@ -41,7 +41,7 @@ class CampaniaResponse(BaseModel):
     estado: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 @router.post("/guardar-campania", response_model=CampaniaResponse)

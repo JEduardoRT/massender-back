@@ -12,6 +12,7 @@ CREATE TABLE Acceso (
 CREATE TABLE Rol (
     rol_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     descripcion CHAR(30) NOT NULL,
+    scopes VARCHAR(100) NOT NULL,
     estado CHAR(1) NOT NULL,
     fecha_insercion DATETIME NOT NULL,
     fecha_modificacion DATETIME NULL,

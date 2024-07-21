@@ -16,4 +16,6 @@ class Acceso(Base):
     usuario_insercion = Column(Integer, nullable=False)
     usuario_modificacion = Column(Integer, nullable=True)
 
-    roles = relationship('Rol', secondary='AccesoRol', back_populates='accesos')
+    roles = relationship('Rol',
+                         secondary='AccesoRol',
+                         back_populates='accesos')
