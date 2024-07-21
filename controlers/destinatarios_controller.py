@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from datetime import datetime
 from models.lista_destinatarios import ListaDestinatarios
-from models.destinatarios import Destinatario
+from repository.destinatarios import Destinatario
 from config.db import get_db
 from models.lista_destinatarios_request import ListaDestinatariosRequest
 from security.token import User
@@ -40,14 +40,18 @@ async def guardar_destinatarios(current_user: Annotated[User, Security(get_curre
             db.add(nuevo_destinatario)
         db.commit()
 
-        return JSONResponse(content={"message": "Lista de contactos creada con éxito."}, status_code=201)
+        return JSONResponse(
+            content={"message": "Lista de contactos creada con éxito."},
+            status_code=201)
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/listar-destinatarios")
-async def listar_destinatarios(current_user: Annotated[User, Security(get_current_active_user)], db: Session = Depends(get_db)):
+async def listar_destinatarios(
+        current_user: Annotated[User, Security(get_current_active_user)],
+        db: Session = Depends(get_db)):
     try:
         listas = db.query(ListaDestinatarios).filter_by(estado='A').all()
         resultado = []
@@ -56,7 +60,7 @@ async def listar_destinatarios(current_user: Annotated[User, Security(get_curren
             resultado.append({
                 "id": lista.id,
                 "nombre": lista.nombre,
-                "fecha_modificacion": lista.fecha_modificacion.isoformat(),  # Convertimos la fecha a un formato serializable
+                "fecha_modificacion": lista.fecha_modificacion.isoformat(),
                 "destinatarios": [
                     {
                         "cedula": dest.cedula,
@@ -74,11 +78,15 @@ async def listar_destinatarios(current_user: Annotated[User, Security(get_curren
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/verdestinatarioporlista/{lista_id}")
-async def verdestinatarioporlista(current_user: Annotated[User, Security(get_current_active_user)], lista_id: int, db: Session = Depends(get_db)):
+async def verdestinatarioporlista(
+        current_user: Annotated[User, Security(get_current_active_user)],
+        lista_id: int, db: Session = Depends(get_db)):
     try:
         destinatarios = db.query(Destinatario).filter(Destinatario.lista_id == lista_id, Destinatario.estado == 'A').all()
         if not destinatarios:
-            raise HTTPException(status_code=404, detail="No se encontraron destinatarios para la lista especificada")
+            raise HTTPException(
+                status_code=404,
+                detail="No se encontraron destinatarios para la lista especificada")
         return destinatarios
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

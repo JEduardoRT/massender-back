@@ -44,7 +44,7 @@ VALUES
 INSERT INTO MedioPago (descripcion, codigo, estado, fecha_insercion, usuario_insercion)
 VALUES 
 ('Tarjeta de Credito', 'TDC', 'A', NOW(), 0),
-('Tarjeta de Débito', 'TDE', 'A', NOW(), 0),
+('Tarjeta de Dï¿½bito', 'TDE', 'A', NOW(), 0),
 ('PayPal', 'PAY', 'A', NOW(), 0),
 ('Transferencia', 'TRA', 'A', NOW(), 0);
 
@@ -78,9 +78,9 @@ VALUES
 -- Insertar datos en la tabla Usuario
 INSERT INTO Usuario (username, nombre_completo, password, correo, rol_id, cliente_id, telefono, estado, fecha_insercion, usuario_insercion)
 VALUES 
-('hangaroa.admin', 'SuperAdmin Hangaroa', 'contraseniaencriptada', 'admin@hangaroa.com.ec', 1, NULL, '+593993879910', 'A', NOW(), 0),
-('prueba.cliente1', 'User Cliente 1', 'contraseniaencriptada', 'user1@client1.com', 2, 1, '+593987654321', 'A', NOW(), 0),
-('prueba.claro', 'User Claro', 'contraseniaencriptada', 'user@claro.com.ec', 2, 2, '+593987654321', 'A', NOW(), 0);
+('hang.admin', 'SuperAdmin Hangaroa', 'contraseniaencriptada', 'admin@hangaroa.com.ec', 1, NULL, '+593993879910', 'A', NOW(), 0),
+('prueba.cli', 'User Cliente 1', 'contraseniaencriptada', 'user1@client1.com', 2, 1, '+593987654321', 'A', NOW(), 0),
+('prue.claro', 'User Claro', 'contraseniaencriptada', 'user@claro.com.ec', 2, 2, '+593987654321', 'A', NOW(), 0);
 
 -- Insertar datos en la tabla Campania
 INSERT INTO Campania (nombre, fecha_ini, fecha_fin, activo, cliente_id, estado, fecha_insercion, usuario_insercion)

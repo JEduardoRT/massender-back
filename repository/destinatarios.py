@@ -1,9 +1,8 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, CHAR, VARCHAR
-from config.db import engine, Base
-from models.base import MassenderBase
+from sqlalchemy import Column, Integer, ForeignKey, CHAR, VARCHAR
+from config.db import Base
 
 
-class Destinatario(MassenderBase):
+class Destinatario(Base):
     __tablename__ = "destinatario"
     destinatario_id = Column(Integer, primary_key=True, autoincrement=True)
     nombre = Column(CHAR(20), nullable=False)
@@ -14,7 +13,3 @@ class Destinatario(MassenderBase):
     estado = Column(CHAR(1), nullable=False)
     genero = Column(CHAR(1), nullable=False)
     cedula = Column(CHAR(20), nullable=False)
-
-
-
-Base.metadata.create_all(bind=engine)

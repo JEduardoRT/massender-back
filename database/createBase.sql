@@ -101,6 +101,21 @@ CREATE TABLE Usuario (
     FOREIGN KEY (cliente_id) REFERENCES Cliente(cliente_id)
 );
 
+CREATE TABLE Campania (
+    campania_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    nombre CHAR(50) NOT NULL,
+    fecha_ini DATE,
+    fecha_fin DATE,
+    activo BOOLEAN NOT NULL,
+    cliente_id INT NOT NULL,
+    estado CHAR(1) NOT NULL,
+    fecha_insercion DATETIME NOT NULL,
+    fecha_modificacion DATETIME NULL,
+    usuario_insercion INT NOT NULL,
+    usuario_modificacion INT NULL,
+    FOREIGN KEY (cliente_id) REFERENCES Cliente(cliente_id)
+);
+
 CREATE TABLE UsuarioCampania (
     usuario_camp_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     usuario_id INT NOT NULL,
@@ -144,20 +159,7 @@ CREATE TABLE Pago (
     FOREIGN KEY (membresia_id) REFERENCES Membresia(membresia_id)
 );
 
-CREATE TABLE Campania (
-    campania_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    nombre CHAR(50) NOT NULL,
-    fecha_ini DATE,
-    fecha_fin DATE,
-    activo BOOLEAN NOT NULL,
-    cliente_id INT NOT NULL,
-    estado CHAR(1) NOT NULL,
-    fecha_insercion DATETIME NOT NULL,
-    fecha_modificacion DATETIME NULL,
-    usuario_insercion INT NOT NULL,
-    usuario_modificacion INT NULL,
-    FOREIGN KEY (cliente_id) REFERENCES Cliente(cliente_id)
-);
+
 
 CREATE TABLE ListaDestinatarios (
     lista_destinatarios_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -189,7 +191,7 @@ CREATE TABLE Destinatario (
 CREATE TABLE Mensaje (
     mensaje_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     campania_id INT NOT NULL,
-    texto VARCHAR(60000) NOT NULL,
+    texto TEXT NOT NULL,
     multimedia VARCHAR(2000) NOT NULL,
     estado CHAR(1) NOT NULL,
     fecha_insercion DATETIME NOT NULL,
