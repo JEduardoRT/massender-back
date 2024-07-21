@@ -1,7 +1,7 @@
 
 # to get a string like this run:
 # openssl rand -hex 32
-#ESTE ES EL KEY DE DEV
+# ESTE ES EL KEY DE DEV
 SECRET_KEY = "3827f9616ecc024d04f2d7242faa4ba6b99c249afaddee7e66555db3c8bce29b"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 5

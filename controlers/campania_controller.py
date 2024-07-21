@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from datetime import datetime
 from models.lista_destinatarios import ListaDestinatarios
-from models.destinatarios import Destinatario
+from repository.destinatarios import Destinatario
 from models.filtro import Filtro
 from models.campania import Campania
 from config.db import get_db

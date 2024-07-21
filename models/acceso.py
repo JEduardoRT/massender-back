@@ -4,8 +4,8 @@ from typing import Optional
 
 from models.base import MassenderBase
 
+
 class Acceso(MassenderBase):
-    __tablename__ = "Acceso"
     acceso_id: Optional[int]
     ruta: str = Field(..., max_length=100)
     descripcion: str = Field(..., max_length=50)
@@ -13,7 +13,11 @@ class Acceso(MassenderBase):
     @field_validator('ruta')
     def validar_ruta(cls, v):
         if v is not None:
-            # Expresión regular para validar el formato de un número de teléfono
-            if not re.match(r'^(/\w+)+$', v):
+            # Expresión regular para validar
+            # el formato de un número de teléfono
+            if not re.match(r'^/*\w+(/\w+)+$', v):
                 raise ValueError('La ruta no es válida')
         return v
+
+    class Config:
+        orm_mode = True
