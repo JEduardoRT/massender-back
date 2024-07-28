@@ -3,10 +3,10 @@ from fastapi import APIRouter, Depends, HTTPException, Security
 from sqlalchemy.orm import Session
 from datetime import datetime
 from models.acceso import Acceso, AccesoCreate, AccesoUpdate
+from models.usuario import Usuario
 from repository.rol import Rol as RolRepo
 from repository.acceso import Acceso as AccesoRepo
 from repository.acceso_rol import AccesoRol as AccesoRolRepo
-from security.token import User
 from security.utility import get_current_active_user
 from config.db import get_db
 from utils.constants import ESTADO_ACTIVO, ESTADO_INACTIVO
@@ -16,7 +16,7 @@ router = APIRouter(tags=["Accesos"])
 
 @router.post("/accesos", response_model=AccesoCreate)
 def create_acceso(
-            current_user: Annotated[User, Security(
+            current_user: Annotated[Usuario, Security(
                 get_current_active_user,
                 scopes=["admin"])],
             acceso: AccesoCreate,
@@ -41,7 +41,7 @@ def create_acceso(
 
 @router.get("/accesos/{acceso_id}", response_model=Acceso)
 def read_acceso(
-            current_user: Annotated[User, Security(get_current_active_user)],
+            current_user: Annotated[Usuario, Security(get_current_active_user)],
             acceso_id: int,
             db: Session = Depends(get_db)):
     try:
@@ -60,7 +60,7 @@ def read_acceso(
 
 @router.get("/accesos", response_model=List[Acceso])
 def read_accesos(
-            current_user: Annotated[User, Security(
+            current_user: Annotated[Usuario, Security(
                 get_current_active_user,
                 scopes=["admin"])],
             db: Session = Depends(get_db)):
@@ -74,7 +74,7 @@ def read_accesos(
 
 @router.get("/accesos/byrol/{rol_id}", response_model=List[Acceso])
 def read_accesos_by_rol(
-            current_user: Annotated[User, Security(get_current_active_user)],
+            current_user: Annotated[Usuario, Security(get_current_active_user)],
             rol_id: int,
             skip: int = 0,
             limit: int = 10,
@@ -94,14 +94,15 @@ def read_accesos_by_rol(
 
 @router.put("/accesos", response_model=AccesoUpdate)
 def update_acceso(
-            current_user: Annotated[User, Security(
+            current_user: Annotated[Usuario, Security(
                 get_current_active_user,
                 scopes=["admin"])],
             acceso: AccesoUpdate,
             db: Session = Depends(get_db)):
     try:
         acceso_existente = db.query(AccesoRepo).\
-            filter(AccesoRepo.acceso_id == acceso.acceso_id).\
+            filter(AccesoRepo.acceso_id == acceso.acceso_id,
+                   AccesoRepo.estado == ESTADO_ACTIVO).\
             first()
         if not acceso_existente:
             raise HTTPException(status_code=404, detail="Acceso no encontrado")
@@ -126,14 +127,15 @@ def update_acceso(
 
 @router.delete("/accesos/{acceso_id}")
 def delete_acceso(
-            current_user: Annotated[User, Security(
+            current_user: Annotated[Usuario, Security(
                 get_current_active_user,
                 scopes=["admin"])],
             acceso_id: int,
             db: Session = Depends(get_db)):
     try:
         acceso = db.query(AccesoRepo).\
-            filter(AccesoRepo.acceso_id == acceso_id).\
+            filter(AccesoRepo.acceso_id == acceso_id,
+                   AccesoRepo.estado == ESTADO_ACTIVO).\
             first()
         if not acceso:
             raise HTTPException(status_code=404, detail="Acceso no encontrado")

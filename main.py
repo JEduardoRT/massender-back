@@ -2,6 +2,9 @@ from fastapi import FastAPI
 import uvicorn
 from starlette.middleware.cors import CORSMiddleware
 
+from controlers.usuario_controller import router as usuario_controller
+from controlers.cliente_controller import router as cliente_controller
+from controlers.pago_controller import router as pago_controller
 from controlers.rol_controller import router as rol_controller
 from controlers.acceso_controller import router as acceso_controller
 from controlers.security import router as security_controller
@@ -33,6 +36,9 @@ app.include_router(security_controller)
 app.include_router(destinatarios_controller)
 app.include_router(dictionaries_controller)
 app.include_router(campania_controller)
+app.include_router(usuario_controller)
+app.include_router(cliente_controller)
+app.include_router(pago_controller)
 
 # this is for DEBUG (comment when launch in prod)
 if __name__ == "__main__":

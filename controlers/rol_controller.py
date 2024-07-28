@@ -5,9 +5,9 @@ from datetime import datetime
 
 from models.acceso_rol import AccesoRol, AccesoRolCreate
 from models.rol import Rol, RolCreate, RolUpdate
+from models.usuario import Usuario
 from repository.rol import Rol as RolRepo
 from repository.acceso_rol import AccesoRol as AccesoRolRepo
-from security.token import User
 from security.utility import get_current_active_user
 from config.db import get_db
 from utils.constants import ESTADO_ACTIVO, ESTADO_INACTIVO
@@ -17,7 +17,7 @@ router = APIRouter(tags=["Roles"])
 
 @router.post("/roles", response_model=RolCreate)
 def create_rol(
-        current_user: Annotated[User, Security(get_current_active_user)],
+        current_user: Annotated[Usuario, Security(get_current_active_user)],
         rol: RolCreate,
         db: Session = Depends(get_db)):
     try:
@@ -39,7 +39,7 @@ def create_rol(
 
 
 @router.post("/roles/agregarAccesos")
-def add_access_to_rol(current_user: Annotated[User, Security(get_current_active_user)],
+def add_access_to_rol(current_user: Annotated[Usuario, Security(get_current_active_user)],
                       accesos_rol: List[AccesoRolCreate],
                       db: Session = Depends(get_db)):
     try:
@@ -62,7 +62,7 @@ def add_access_to_rol(current_user: Annotated[User, Security(get_current_active_
 
 
 @router.get("/roles/{rol_id}", response_model=Rol)
-def read_rol(current_user: Annotated[User, Security(get_current_active_user)],
+def read_rol(current_user: Annotated[Usuario, Security(get_current_active_user)],
              rol_id: int,
              db: Session = Depends(get_db)):
     try:
@@ -79,7 +79,7 @@ def read_rol(current_user: Annotated[User, Security(get_current_active_user)],
 
 
 @router.get("/roles", response_model=List[Rol])
-def read_rols(current_user: Annotated[User, Security(
+def read_rols(current_user: Annotated[Usuario, Security(
                 get_current_active_user,
                 scopes=["admin"])],
               db: Session = Depends(get_db)):
@@ -92,12 +92,13 @@ def read_rols(current_user: Annotated[User, Security(
 
 
 @router.put("/roles", response_model=RolUpdate)
-def update_rol(current_user: Annotated[User, Security(get_current_active_user)],
+def update_rol(current_user: Annotated[Usuario, Security(get_current_active_user)],
                rol: RolUpdate,
                db: Session = Depends(get_db)):
     try:
         rol_existente = db.query(RolRepo).\
-            filter(RolRepo.rol_id == rol.rol_id).\
+            filter(RolRepo.rol_id == rol.rol_id,
+                   RolRepo.estado == ESTADO_ACTIVO).\
             first()
         if not rol_existente:
             raise HTTPException(status_code=404, detail="Rol no encontrado")
@@ -121,12 +122,13 @@ def update_rol(current_user: Annotated[User, Security(get_current_active_user)],
 
 
 @router.delete("/roles/{rol_id}")
-def delete_rol(current_user: Annotated[User, Security(get_current_active_user)],
+def delete_rol(current_user: Annotated[Usuario, Security(get_current_active_user)],
                rol_id: int,
                db: Session = Depends(get_db)):
     try:
         rol = db.query(RolRepo).\
-            filter(RolRepo.rol_id == rol_id).\
+            filter(RolRepo.rol_id == rol_id,
+                   RolRepo.estado == ESTADO_ACTIVO).\
             first()
         if not rol:
             raise HTTPException(status_code=404, detail="Rol no encontrado")
@@ -140,7 +142,7 @@ def delete_rol(current_user: Annotated[User, Security(get_current_active_user)],
 
 
 @router.post("/roles/eliminarAccesos")
-def delete_access_from_rol(current_user: Annotated[User, Security(get_current_active_user)],
+def delete_access_from_rol(current_user: Annotated[Usuario, Security(get_current_active_user)],
                            accesos_rol: List[AccesoRol],
                            db: Session = Depends(get_db)):
     try:

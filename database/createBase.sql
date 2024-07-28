@@ -69,7 +69,7 @@ CREATE TABLE MedioPago (
 CREATE TABLE Cliente (
     cliente_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     nombre CHAR(20) NOT NULL,
-    membresia_id INT NOT NULL,
+    membresia_id INT NULL,
     tabla_precios_id INT NOT NULL,
     medio_pago_id INT NOT NULL,
     fecha_ini_memb DATE,
@@ -88,7 +88,7 @@ CREATE TABLE Usuario (
     usuario_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     username CHAR(10) NOT NULL,
     nombre_completo CHAR(50) NOT NULL,
-    password CHAR(50) NOT NULL,
+    password CHAR(60) NOT NULL,
     correo CHAR(30) NOT NULL,
     rol_id INT NOT NULL,
     cliente_id INT,
