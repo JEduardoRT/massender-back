@@ -11,6 +11,11 @@ from controlers.security import router as security_controller
 from controlers.destinatarios_controller import router as destinatarios_controller
 from controlers.dictionaries_controller import router as dictionaries_controller
 from controlers.campania_controller import router as campania_controller
+from controlers.medio_pago_controller import router as medio_pago_controller
+from controlers.membresia_controller import router as membresia_controller
+from controlers.mensaje_controller import router as mensaje_controller
+from controlers.precio_controller import router as precio_controller
+from controlers.tabla_precios_controller import router as tabla_precios_controller
 
 
 app = FastAPI(root_path="/massender")
@@ -39,6 +44,11 @@ app.include_router(campania_controller)
 app.include_router(usuario_controller)
 app.include_router(cliente_controller)
 app.include_router(pago_controller)
+app.include_router(medio_pago_controller)
+app.include_router(membresia_controller)
+app.include_router(mensaje_controller)
+app.include_router(precio_controller)
+app.include_router(tabla_precios_controller)
 
 # this is for DEBUG (comment when launch in prod)
 if __name__ == "__main__":
