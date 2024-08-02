@@ -89,6 +89,8 @@ def update_precio(
 
         for key, value in precio.model_dump(exclude_unset=True,
                                             exclude={'precio_id',
+                                                     'membresia_id',
+                                                     'tabla_precios_id',
                                                      'fecha_insercion',
                                                      'usuario_insercion',
                                                      'estado'}).items():

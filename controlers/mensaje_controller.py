@@ -89,6 +89,7 @@ def update_mensaje(
 
         for key, value in mensaje.model_dump(exclude_unset=True,
                                              exclude={'mensaje_id',
+                                                      'campania_id',
                                                       'fecha_insercion',
                                                       'usuario_insercion',
                                                       'estado'}).items():

@@ -6,10 +6,10 @@ from models.base import MassenderBase
 
 
 class Mensaje(MassenderBase):
-    mensaje_id: Optional[int]
-    campania_id: Optional[int]
-    texto: Optional[str] = Field(..., max_length=60000)
-    multimedia: Optional[str] = Field(..., max_length=2000)
+    mensaje_id: Optional[int] = None
+    campania_id: Optional[int] = None
+    texto: Optional[str] = Field(None, max_length=60000)
+    multimedia: Optional[str] = Field(None, max_length=2000)
 
 
 class MensajeCreate(Mensaje):
