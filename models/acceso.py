@@ -16,7 +16,7 @@ class Acceso(MassenderBase):
         if v is not None:
             # Expresión regular para validar
             # el formato de un número de teléfono
-            if not re.match(r'^/*\w+(/\w+)+$', v):
+            if not re.match(r'^/*\w+(/:*\w+)*$', v):
                 raise ValueError('La ruta no es válida')
         return v
 
