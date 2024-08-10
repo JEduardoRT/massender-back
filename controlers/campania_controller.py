@@ -14,6 +14,8 @@ from typing import List, Optional
 
 from models.lista_destinatarios import ListaDestinatarios
 from services.send_email import enviar_correo
+from services.send_sms import enviar_sms
+from services.send_whatsapp import enviar_mensaje_whatsapp
 
 router = APIRouter(tags=["Campañas"])
 
@@ -28,6 +30,7 @@ class CampaniaCreate(BaseModel):
     mensaje: str
     filtro_id: Optional[int]
     lista_id: int
+    medio: str
 
 
 class CampaniaResponse(BaseModel):
@@ -75,11 +78,23 @@ async def guardar_campania(campania: CampaniaCreate, db: Session = Depends(get_d
         if not destinatarios:
             raise HTTPException(status_code=404, detail="No se encontraron destinatarios para la campaña")
 
-        email_list = [destinatario.correo for destinatario in destinatarios]
-        logger.info(f"Enviando correos a: {email_list}")
-
-        enviar_correo(email_list, campania.nombre, campania.mensaje)
-        logger.info("Correos enviados con éxito")
+        if campania.medio == 'email':
+            email_list = [destinatario.correo for destinatario in destinatarios]
+            logger.info(f"Enviando correos a: {email_list}")
+            enviar_correo(email_list, campania.nombre, campania.mensaje)
+            logger.info("Correos enviados con éxito")
+        elif campania.medio == 'sms':
+            phone_list = [destinatario.telefono for destinatario in destinatarios]
+            logger.info(f"Enviando SMS a: {phone_list}")
+            enviar_sms(phone_list, campania.mensaje)
+            logger.info("SMS enviados con éxito")
+        elif campania.medio == 'whatsapp':
+            phone_list = [destinatario.telefono for destinatario in destinatarios]
+            logger.info(f"Enviando mensajes de WhatsApp a: {phone_list}")
+            enviar_mensaje_whatsapp(phone_list, campania.nombre, campania.mensaje)
+            logger.info("Mensajes de WhatsApp enviados con éxito")
+        else:
+            raise HTTPException(status_code=400, detail="Medio de envío no soportado")
 
         lista = db.query(ListaDestinatarios).filter(ListaDestinatarios.id == campania.lista_id).first()
         lista_nombre = lista.nombre if lista else "N/A"
