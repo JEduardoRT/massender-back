@@ -1,6 +1,6 @@
 import re
 from pydantic import EmailStr, Field, field_validator
-from typing import Optional
+from typing import Optional, Literal
 
 from models.base import MassenderBase
 
@@ -9,9 +9,10 @@ class DestinatarioRequest(MassenderBase):
     cedula: str = Field(..., max_length=20)
     nombre: str = Field(..., max_length=20)
     apellido: str = Field(..., max_length=20)
-    genero: str = Field(..., max_length=1)
+    genero: Literal['M', 'F']
     correo: EmailStr = Field(..., max_length=50)
     telefono: Optional[str] = Field(None, max_length=15)
+
 
     @field_validator('telefono')
     def validar_telefono(cls, v):
