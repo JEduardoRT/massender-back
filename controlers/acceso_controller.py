@@ -28,7 +28,8 @@ def create_acceso(
             descripcion=acceso.descripcion,
             estado=ESTADO_ACTIVO,
             fecha_insercion=acceso.fecha_insercion,
-            usuario_insercion=acceso.usuario_insercion)
+            usuario_insercion=acceso.usuario_insercion,
+            parent_id=acceso.parent_id)
 
         db.add(db_acceso)
         db.commit()

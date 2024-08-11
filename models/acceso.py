@@ -1,7 +1,7 @@
 from datetime import datetime
 import re
 from pydantic import Field, field_validator
-from typing import Optional
+from typing import List, Optional
 
 from models.base import MassenderBase
 
@@ -10,6 +10,9 @@ class Acceso(MassenderBase):
     acceso_id: Optional[int] = None
     ruta: Optional[str] = Field(None, max_length=100)
     descripcion: Optional[str] = Field(None, max_length=50)
+    parent_id: Optional[int] = None
+
+    children: Optional[List['Acceso']] = None
 
     @field_validator('ruta')
     def validar_ruta(cls, v):

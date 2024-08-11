@@ -1,12 +1,14 @@
 CREATE TABLE Acceso (
     acceso_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    parent_id INT NULL,
     ruta CHAR(100) NOT NULL,
     descripcion CHAR(50) NOT NULL,
     estado CHAR(1) NOT NULL,
     fecha_insercion DATETIME NOT NULL,
     fecha_modificacion DATETIME NULL,
     usuario_insercion INT NOT NULL,
-    usuario_modificacion INT NULL
+    usuario_modificacion INT NULL,
+    FOREIGN KEY (parent_id) REFERENCES Acceso(acceso_id)
 );
 
 CREATE TABLE Rol (
