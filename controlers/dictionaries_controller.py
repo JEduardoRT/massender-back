@@ -5,7 +5,7 @@ from models.filtro import Filtro
 from config.db import get_db
 from fastapi.responses import JSONResponse
 
-router = APIRouter()
+router = APIRouter(tags=["Filtros"])
 
 
 @router.get("/listar-filtros")
@@ -16,4 +16,7 @@ async def listar_filtros(db: Session = Depends(get_db)):
                      filtros]
         return JSONResponse(content=resultado, status_code=200)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))

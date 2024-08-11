@@ -6,6 +6,7 @@ class Campania(Base):
     __tablename__ = 'Campania'
 
     campania_id = Column(Integer, primary_key=True, autoincrement=True)
+    mensaje_id = Column(Integer, ForeignKey('Mensaje.mensaje_id'), nullable=True)
     nombre = Column(String(50), nullable=False)
     fecha_ini = Column(Date, nullable=True)
     fecha_fin = Column(Date, nullable=True)

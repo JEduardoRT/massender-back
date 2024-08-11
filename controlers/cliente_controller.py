@@ -13,11 +13,8 @@ from utils.constants import ESTADO_ACTIVO, ESTADO_INACTIVO
 router = APIRouter(tags=["Clientes"])
 
 
-@router.post("/clientes", response_model=ClienteCreate)
+@router.post("/clientes", response_model=Cliente)
 def create_cliente(
-        current_user: Annotated[Usuario, Security(
-             get_current_active_user,
-             scopes=["admin"])],
         cliente: ClienteCreate,
         db: Session = Depends(get_db)):
     try:
@@ -36,10 +33,13 @@ def create_cliente(
         db.add(db_cliente)
         db.commit()
         db.refresh(db_cliente)
-        return cliente
+        return db_cliente
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/clientes/{cliente_id}", response_model=Cliente)
@@ -58,7 +58,10 @@ def read_cliente(
                                 detail="Cliente no encontrado")
         return cliente
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/clientes", response_model=List[Cliente])
@@ -68,13 +71,17 @@ def read_clientes(current_user: Annotated[Usuario, Security(
               db: Session = Depends(get_db)):
     try:
         clientes = db.query(ClienteRepo).\
+            filter(ClienteRepo.estado == ESTADO_ACTIVO).\
             all()
         return clientes
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.put("/clientes", response_model=ClienteUpdate)
+@router.put("/clientes", response_model=Cliente)
 def update_cliente(
         current_user: Annotated[Usuario, Security(get_current_active_user)],
         cliente: ClienteUpdate,
@@ -102,7 +109,10 @@ def update_cliente(
         return cliente_existente
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.delete("/clientes/{cliente_id}")
@@ -126,4 +136,7 @@ def delete_cliente(
         return {"message": "Cliente eliminado con éxito"}
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))

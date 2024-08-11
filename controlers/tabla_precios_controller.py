@@ -13,7 +13,7 @@ from utils.constants import ESTADO_ACTIVO, ESTADO_INACTIVO
 router = APIRouter(tags=["TablaPrecios"])
 
 
-@router.post("/tablaPrecios", response_model=TablaPreciosCreate)
+@router.post("/tablaPrecios", response_model=TablaPrecios)
 def create_tablaPrecios(
         current_user: Annotated[Usuario, Security(get_current_active_user,
                                                   scopes=["admin"])],
@@ -34,10 +34,13 @@ def create_tablaPrecios(
         db.add(db_tablaPrecios)
         db.commit()
         db.refresh(db_tablaPrecios)
-        return tablaPrecios
+        return db_tablaPrecios
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/tablaPrecios/{tabla_precios_id}", response_model=TablaPrecios)
@@ -56,7 +59,10 @@ def read_tablaPrecios(
                                 detail="Tabla de Precios no encontrado")
         return tablaPrecios
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/tablaPrecios", response_model=List[TablaPrecios])
@@ -66,10 +72,14 @@ def read_tablasPrecios(current_user: Annotated[Usuario, Security(
                db: Session = Depends(get_db)):
     try:
         tablaPrecios = db.query(TablaPreciosRepo).\
+            filter(TablaPreciosRepo.estado == ESTADO_ACTIVO).\
             all()
         return tablaPrecios
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.put("/tablaPrecios", response_model=TablaPreciosUpdate)
@@ -102,7 +112,10 @@ def update_tablaPrecios(
         return tablaPrecios_existente
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.delete("/tablaPrecios/{tabla_precios_id}")
@@ -115,7 +128,8 @@ def delete_tablaPrecios(
     try:
         tablaPrecios = db.query(TablaPreciosRepo).\
             filter(TablaPreciosRepo.tabla_precios_id == tabla_precios_id,
-                   TablaPreciosRepo.estado == ESTADO_ACTIVO).\
+                   TablaPreciosRepo.estado == ESTADO_ACTIVO,
+                   TablaPreciosRepo.tabla_precios_id != 1).\
             first()
         if not tablaPrecios:
             raise HTTPException(status_code=404,
@@ -126,4 +140,7 @@ def delete_tablaPrecios(
         return {"message": "Tabla de Precios eliminado con éxito"}
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))

@@ -13,7 +13,7 @@ from utils.constants import ESTADO_ACTIVO, ESTADO_INACTIVO
 router = APIRouter(tags=["MedioPagos"])
 
 
-@router.post("/medioPagos", response_model=MedioPagoCreate)
+@router.post("/medioPagos", response_model=MedioPago)
 def create_medioPago(
         current_user: Annotated[Usuario, Security(
              get_current_active_user,
@@ -32,10 +32,13 @@ def create_medioPago(
         db.add(db_medioPago)
         db.commit()
         db.refresh(db_medioPago)
-        return medioPago
+        return db_medioPago
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/medioPagos/{medioPago_id}", response_model=MedioPago)
@@ -54,25 +57,32 @@ def read_medioPago(
                                 detail="medio de pago no encontrado")
         return medioPago
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/medioPagos", response_model=List[MedioPago])
 def read_medioPagos(current_user: Annotated[Usuario, Security(
-                get_current_active_user,
-                scopes=["admin"])],
+                get_current_active_user)],
               db: Session = Depends(get_db)):
     try:
         medioPagos = db.query(MedioPagoRepo).\
+            filter(MedioPagoRepo.estado == ESTADO_ACTIVO).\
             all()
         return medioPagos
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.put("/medioPagos", response_model=MedioPagoUpdate)
 def update_medioPago(
-        current_user: Annotated[Usuario, Security(get_current_active_user)],
+        current_user: Annotated[Usuario, Security(get_current_active_user,
+                                scopes=["admin"])],
         medioPago: MedioPagoUpdate,
         db: Session = Depends(get_db)):
     try:
@@ -98,7 +108,10 @@ def update_medioPago(
         return medioPago_existente
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.delete("/medioPagos/{medioPago_id}")
@@ -122,4 +135,7 @@ def delete_medioPago(
         return {"message": "medio de pago eliminado con éxito"}
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))

@@ -36,7 +36,10 @@ def create_acceso(
         return acceso
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/accesos/{acceso_id}", response_model=Acceso)
@@ -55,7 +58,10 @@ def read_acceso(
         return acceso
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/accesos", response_model=List[Acceso])
@@ -66,10 +72,14 @@ def read_accesos(
             db: Session = Depends(get_db)):
     try:
         accesos = db.query(AccesoRepo).\
+            filter(AccesoRepo.estado == ESTADO_ACTIVO).\
             all()
         return accesos
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/accesos/byrol/{rol_id}", response_model=List[Acceso])
@@ -89,7 +99,10 @@ def read_accesos_by_rol(
 
         return accesos
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.put("/accesos", response_model=AccesoUpdate)
@@ -122,7 +135,10 @@ def update_acceso(
         return acceso
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.delete("/accesos/{acceso_id}")
@@ -145,4 +161,7 @@ def delete_acceso(
         return {"message": "Acceso eliminado con éxito"}
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))

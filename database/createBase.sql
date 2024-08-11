@@ -104,6 +104,7 @@ CREATE TABLE Usuario (
 
 CREATE TABLE Campania (
     campania_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    mensaje_id INT NULL,
     nombre CHAR(50) NOT NULL,
     fecha_ini DATE,
     fecha_fin DATE,
@@ -115,6 +116,7 @@ CREATE TABLE Campania (
     usuario_insercion INT NOT NULL,
     usuario_modificacion INT NULL,
     FOREIGN KEY (cliente_id) REFERENCES Cliente(cliente_id)
+    FOREIGN KEY (mensaje_id) REFERENCES Mensaje(mensaje_id)
 );
 
 CREATE TABLE UsuarioCampania (

@@ -15,7 +15,7 @@ from utils.constants import ESTADO_ACTIVO, ESTADO_INACTIVO
 router = APIRouter(tags=["Roles"])
 
 
-@router.post("/roles", response_model=RolCreate)
+@router.post("/roles", response_model=Rol)
 def create_rol(
         current_user: Annotated[Usuario, Security(get_current_active_user)],
         rol: RolCreate,
@@ -32,10 +32,13 @@ def create_rol(
         db.add(db_rol)
         db.commit()
         db.refresh(db_rol)
-        return rol
+        return db_rol
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/roles/agregarAccesos")
@@ -58,7 +61,10 @@ def add_access_to_rol(current_user: Annotated[Usuario, Security(get_current_acti
         return {"message": "Accesos agregados al rol con éxito"}
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/roles/{rol_id}", response_model=Rol)
@@ -75,20 +81,35 @@ def read_rol(current_user: Annotated[Usuario, Security(get_current_active_user)]
             raise HTTPException(status_code=404, detail="Rol no encontrado")
         return rol
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/roles", response_model=List[Rol])
 def read_rols(current_user: Annotated[Usuario, Security(
-                get_current_active_user,
-                scopes=["admin"])],
+                get_current_active_user)],
               db: Session = Depends(get_db)):
     try:
-        roles = db.query(RolRepo).\
-            all()
+        if "admin" in current_user.rol.scopes:
+            roles = db.query(RolRepo).\
+                filter(RolRepo.descripcion != "SuperAdministrador",
+                       RolRepo.estado == ESTADO_ACTIVO).\
+                all()
+        else:
+            roles = db.query(RolRepo).\
+                filter(RolRepo.descripcion != "Administrador",
+                       RolRepo.descripcion != "SuperAdministrador",
+                       RolRepo.estado == ESTADO_ACTIVO).\
+                all()
+
         return roles
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.put("/roles", response_model=RolUpdate)
@@ -118,7 +139,10 @@ def update_rol(current_user: Annotated[Usuario, Security(get_current_active_user
         return rol_existente
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.delete("/roles/{rol_id}")
@@ -138,7 +162,10 @@ def delete_rol(current_user: Annotated[Usuario, Security(get_current_active_user
         return {"message": "Rol eliminado con éxito"}
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/roles/eliminarAccesos")
@@ -159,4 +186,7 @@ def delete_access_from_rol(current_user: Annotated[Usuario, Security(get_current
         return {"message": "Accesos eliminados del rol con éxito"}
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))

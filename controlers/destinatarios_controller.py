@@ -51,7 +51,10 @@ async def guardar_destinatarios(data: ListaDestinatariosRequest, db: Session = D
             status_code=201)
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/listar-destinatarios")
@@ -79,7 +82,10 @@ async def listar_destinatarios(db: Session = Depends(get_db)):
             })
         return JSONResponse(content=resultado, status_code=200)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/verdestinatarioporlista/{lista_id}")
@@ -93,7 +99,10 @@ async def verdestinatarioporlista(
                 detail="No se encontraron destinatarios para la lista especificada")
         return destinatarios
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.put("/desactivar-lista/{lista_id}")
@@ -118,7 +127,10 @@ async def desactivar_lista(
             content={"message": "Lista de contactos desactivada con éxito."},
             status_code=200)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 @router.put("/activar-lista/{lista_id}")
 async def activar_lista(lista_id: int, db: Session = Depends(get_db)):
@@ -141,7 +153,10 @@ async def activar_lista(lista_id: int, db: Session = Depends(get_db)):
             content={"message": "Lista de contactos activada con éxito."},
             status_code=200)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.delete("/eliminar-lista/{lista_id}")
@@ -166,7 +181,10 @@ async def eliminar_lista(lista_id: int, db: Session = Depends(get_db)):
             content={"message": "Lista de contactos y campañas asociadas eliminadas con éxito."},
             status_code=200)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 @router.delete("/eliminardestinatario/{id}")
 async def eliminar_destinatario(id: int, db: Session = Depends(get_db)):
@@ -187,7 +205,10 @@ async def eliminar_destinatario(id: int, db: Session = Depends(get_db)):
         )
     except Exception as e:
         logger.error(f"Error al eliminar destinatario: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.put("/actualizardestinatario/{destinatario_id}")
@@ -211,4 +232,7 @@ async def actualizar_destinatario(destinatario_id: int, destinatario: Destinatar
             status_code=200
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))

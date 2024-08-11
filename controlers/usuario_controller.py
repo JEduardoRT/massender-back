@@ -1,4 +1,4 @@
-from typing import Annotated, List
+from typing import Annotated, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Security
 from sqlalchemy.orm import Session, noload
 from datetime import datetime
@@ -12,9 +12,8 @@ from utils.constants import ESTADO_ACTIVO, ESTADO_INACTIVO
 router = APIRouter(tags=["Usuarios"])
 
 
-@router.post("/usuarios", response_model=UsuarioCreate)
+@router.post("/usuarios", response_model=Usuario)
 def create_usuario(
-        current_user: Annotated[Usuario, Security(get_current_active_user)],
         usuario: UsuarioCreate,
         db: Session = Depends(get_db)):
     try:
@@ -34,10 +33,13 @@ def create_usuario(
         db.add(db_usuario)
         db.commit()
         db.refresh(db_usuario)
-        return usuario
+        return db_usuario
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/usuarios/{usuario_id}", response_model=Usuario)
@@ -57,24 +59,36 @@ def read_usuario(
                                 detail="Usuario no encontrado")
         return usuario
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/usuarios", response_model=List[Usuario])
 def read_usuarios(current_user: Annotated[Usuario, Security(
-                get_current_active_user,
-                scopes=["admin"])],
+                get_current_active_user)],
+              cliente_id: int = None,
               db: Session = Depends(get_db)):
     try:
-        usuarios = db.query(UsuarioRepo).\
-            options(noload(UsuarioRepo.rol)).\
+        query = db.query(UsuarioRepo).\
+            filter(UsuarioRepo.rol_id != 1,
+                   UsuarioRepo.estado == ESTADO_ACTIVO)
+
+        if cliente_id is not None:
+            query = query.filter(UsuarioRepo.cliente_id == cliente_id)
+
+        usuarios = query.options(noload(UsuarioRepo.rol)).\
             all()
         return usuarios
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.put("/usuarios", response_model=UsuarioUpdate)
+@router.put("/usuarios", response_model=Usuario)
 def update_usuario(
         current_user: Annotated[Usuario, Security(get_current_active_user)],
         usuario: UsuarioUpdate,
@@ -108,7 +122,10 @@ def update_usuario(
         return usuario_existente
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.delete("/usuarios/{usuario_id}")
@@ -131,4 +148,7 @@ def delete_usuario(
         return {"message": "Usuario eliminado con éxito"}
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))

@@ -13,11 +13,10 @@ from utils.constants import ESTADO_ACTIVO, ESTADO_INACTIVO
 router = APIRouter(tags=["Mensajes"])
 
 
-@router.post("/mensajes", response_model=MensajeCreate)
+@router.post("/mensajes", response_model=Mensaje)
 def create_mensaje(
         current_user: Annotated[Usuario, Security(
-             get_current_active_user,
-             scopes=["admin"])],
+             get_current_active_user)],
         mensaje: MensajeCreate,
         db: Session = Depends(get_db)):
     try:
@@ -33,10 +32,13 @@ def create_mensaje(
         db.add(db_mensaje)
         db.commit()
         db.refresh(db_mensaje)
-        return mensaje
+        return db_mensaje
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/mensajes/{mensaje_id}", response_model=Mensaje)
@@ -55,20 +57,29 @@ def read_mensaje(
                                 detail="mensaje no encontrado")
         return mensaje
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/mensajes", response_model=List[Mensaje])
 def read_mensajes(current_user: Annotated[Usuario, Security(
-                get_current_active_user,
-                scopes=["admin"])],
+                get_current_active_user)],
+              campania_id: int = None,
               db: Session = Depends(get_db)):
     try:
-        mensajes = db.query(MensajeRepo).\
-            all()
+        query = db.query(MensajeRepo).\
+            filter(MensajeRepo.estado == ESTADO_ACTIVO)
+        if campania_id is not None:
+            query = query.filter(MensajeRepo.campania_id == campania_id)
+        mensajes = query.all()
         return mensajes
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.put("/mensajes", response_model=MensajeUpdate)
@@ -100,14 +111,16 @@ def update_mensaje(
         return mensaje_existente
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.delete("/mensajes/{mensaje_id}")
 def delete_mensaje(
         current_user: Annotated[Usuario, Security(
-            get_current_active_user,
-            scopes=["admin"])],
+            get_current_active_user)],
         mensaje_id: int,
         db: Session = Depends(get_db)):
     try:
@@ -124,4 +137,7 @@ def delete_mensaje(
         return {"message": "mensaje eliminado con éxito"}
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))

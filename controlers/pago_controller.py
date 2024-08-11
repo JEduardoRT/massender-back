@@ -33,10 +33,13 @@ def create_pago(
         db.add(db_pago)
         db.commit()
         db.refresh(db_pago)
-        return pago
+        return db_pago
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/pagos/{pago_id}", response_model=Pago)
@@ -55,36 +58,31 @@ def read_pago(
                                 detail="Pago no encontrado")
         return pago
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/pagos", response_model=List[Pago])
 def read_pagos(current_user: Annotated[Usuario, Security(
-                get_current_active_user,
-                scopes=["admin"])],
+                get_current_active_user)],
+               cliente_id: int = None,
                db: Session = Depends(get_db)):
     try:
-        pagos = db.query(PagoRepo).\
-            all()
+        query = db.query(PagoRepo).\
+            filter(PagoRepo.estado == ESTADO_ACTIVO)
+
+        if cliente_id is not None:
+            query = query.filter(PagoRepo.cliente_id == cliente_id)
+
+        pagos = query.all()
         return pagos
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.get("/pagos/bycliente/{cliente_id}", response_model=List[Pago])
-def read_pagos_cliente(current_user: Annotated[Usuario, Security(
-                get_current_active_user,
-                scopes=["admin"])],
-               cliente_id: int,
-               db: Session = Depends(get_db)):
-    try:
-        pagos = db.query(PagoRepo).\
-            filter(PagoRepo.cliente_id == cliente_id,
-                   PagoRepo.estado == ESTADO_ACTIVO).\
-            all()
-        return pagos
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.put("/pagos", response_model=PagoUpdate)
@@ -100,7 +98,9 @@ def update_pago(
         if not pago_existente:
             raise HTTPException(status_code=404,
                                 detail="Pago no encontrado")
-
+        if pago_existente.pagado:
+            raise HTTPException(status_code=400,
+                                detail="No se puede editar un Pago pagado")
         pago.fecha_modificacion = datetime.now()
 
         for key, value in pago.model_dump(exclude_unset=True,
@@ -120,7 +120,10 @@ def update_pago(
         return pago_existente
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.delete("/pagos/{pago_id}")
@@ -133,7 +136,8 @@ def delete_pago(
     try:
         pago = db.query(PagoRepo).\
             filter(PagoRepo.pago_id == pago_id,
-                   PagoRepo.estado == ESTADO_ACTIVO).\
+                   PagoRepo.estado == ESTADO_ACTIVO,
+                   PagoRepo.pagado is False).\
             first()
         if not pago:
             raise HTTPException(status_code=404,
@@ -144,4 +148,7 @@ def delete_pago(
         return {"message": "Pago eliminado con éxito"}
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))

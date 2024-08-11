@@ -13,7 +13,7 @@ from utils.constants import ESTADO_ACTIVO, ESTADO_INACTIVO
 router = APIRouter(tags=["Membresias"])
 
 
-@router.post("/membresias", response_model=MembresiaCreate)
+@router.post("/membresias", response_model=Membresia)
 def create_membresia(
         current_user: Annotated[Usuario, Security(
              get_current_active_user,
@@ -27,17 +27,20 @@ def create_membresia(
             descripcion=membresia.descripcion,
             dias_vigencia=membresia.dias_vigencia,
             estado=ESTADO_ACTIVO,
-            fecha_insercion=membresia.fecha_insercion,            
+            fecha_insercion=membresia.fecha_insercion,
             usuario_insercion=membresia.usuario_insercion)
 
         db.add(db_membresia)
         db.commit()
         db.refresh(db_membresia)
-        return membresia
+        return db_membresia
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
-    
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.get("/membresias/{membresia_id}", response_model=Membresia)
 def read_membresia(
@@ -55,25 +58,32 @@ def read_membresia(
                                 detail="membresia no encontrada")
         return membresia
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-    
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.get("/membresias", response_model=List[Membresia])
 def read_membresias(current_user: Annotated[Usuario, Security(
-                get_current_active_user,
-                scopes=["admin"])],
+                get_current_active_user)],
               db: Session = Depends(get_db)):
     try:
         membresias = db.query(MembresiaRepo).\
+            filter(MembresiaRepo.estado == ESTADO_ACTIVO).\
             all()
         return membresias
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-    
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.put("/membresias", response_model=MembresiaUpdate)
 def update_membresia(
-        current_user: Annotated[Usuario, Security(get_current_active_user)],
+        current_user: Annotated[Usuario, Security(get_current_active_user,
+                                scopes=["admin"])],
         membresia: MembresiaUpdate,
         db: Session = Depends(get_db)):
     try:
@@ -99,8 +109,11 @@ def update_membresia(
         return membresia_existente
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
-    
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.delete("/membresias/{membresia_id}")
 def delete_membresia(
@@ -123,4 +136,7 @@ def delete_membresia(
         return {"message": "membresia eliminada con éxito"}
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))

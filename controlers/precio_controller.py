@@ -36,7 +36,10 @@ def create_precio(
         return precio
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/precios/{precio_id}", response_model=Precio)
@@ -55,25 +58,39 @@ def read_precio(
                                 detail="Precio no encontrado")
         return precio
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/precios", response_model=List[Precio])
 def read_precios(current_user: Annotated[Usuario, Security(
-                get_current_active_user,
-                scopes=["admin"])],
+                get_current_active_user)],
+              tabla_precios_id: int = None,
+              membresia_id: int = None,
               db: Session = Depends(get_db)):
     try:
-        precios = db.query(PrecioRepo).\
-            all()
+        query = db.query(PrecioRepo).\
+            filter(PrecioRepo.estado == ESTADO_ACTIVO)
+        if tabla_precios_id is not None:
+            query = query.filter(
+                PrecioRepo.tabla_precios_id == tabla_precios_id)
+        if membresia_id is not None:
+            query = query.filter(PrecioRepo.membresia_id == membresia_id)
+        precios = query.all()
         return precios
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.put("/precios", response_model=PrecioUpdate)
 def update_precio(
-        current_user: Annotated[Usuario, Security(get_current_active_user)],
+        current_user: Annotated[Usuario, Security(get_current_active_user,
+                                scopes=["admin"])],
         precio: PrecioUpdate,
         db: Session = Depends(get_db)):
     try:
@@ -101,7 +118,10 @@ def update_precio(
         return precio_existente
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.delete("/precios/{precio_id}")
@@ -125,4 +145,7 @@ def delete_precio(
         return {"message": "Precio eliminado con éxito"}
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))

@@ -112,7 +112,10 @@ async def guardar_campania(campania: CampaniaCreate, db: Session = Depends(get_d
 
     except Exception as e:
         logger.error(f"Error al guardar la campaña: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/listar-campanias", response_model=List[CampaniaResponse])
@@ -161,4 +164,7 @@ async def eliminar_campania(campania_id: int, db: Session = Depends(get_db)):
             content={"message": "Campaña eliminada con éxito."},
             status_code=200)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
