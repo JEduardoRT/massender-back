@@ -5,9 +5,10 @@ from datetime import datetime
 
 from models.usuario import Usuario, UsuarioCreate, UsuarioUpdate
 from repository.usuario import Usuario as UsuarioRepo
-from security.utility import get_current_active_user, get_password_hash
+from security.utility import generate_password, get_current_active_user, get_password_hash
 from config.db import get_db
-from utils.constants import ESTADO_ACTIVO, ESTADO_INACTIVO
+from services.send_email import enviar_correo
+from utils.constants import ASUNTO_RECUPERAR, CORREO_RECUPERACION, ESTADO_ACTIVO, ESTADO_INACTIVO
 
 router = APIRouter(tags=["Usuarios"])
 
@@ -63,6 +64,42 @@ def read_usuario(
             raise e
         else:
             raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/usuarios/recuperar/{correo}", response_model=int)
+def recuperar_usuario(
+        correo: str,
+        db: Session = Depends(get_db)):
+    usuario: UsuarioRepo
+    password: str
+    try:
+        usuario = db.query(UsuarioRepo).\
+            options(noload(UsuarioRepo.rol)).\
+            filter(UsuarioRepo.correo == correo,
+                   UsuarioRepo.estado == ESTADO_ACTIVO).\
+            first()
+
+        if not usuario:
+            return 0
+
+        password = generate_password()
+        usuario.fecha_modificacion = datetime.now()
+        usuario.password = get_password_hash(password)
+
+        db.commit()
+        db.refresh(usuario)
+        return usuario.usuario_id
+    except Exception as e:
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        mensaje = CORREO_RECUPERACION
+        mensaje = mensaje.replace("NOMBRE", usuario.nombre_completo)
+        mensaje = mensaje.replace("USUARIO", usuario.username)
+        mensaje = mensaje.replace("PASSWORD", password)
+        enviar_correo([usuario.correo], ASUNTO_RECUPERAR, mensaje)
 
 
 @router.get("/usuarios", response_model=List[Usuario])

@@ -1,3 +1,5 @@
+import random
+import string
 from typing import Annotated
 from fastapi import Depends, HTTPException, Security, status
 from fastapi.security import OAuth2PasswordBearer, SecurityScopes
@@ -29,6 +31,11 @@ def verify_password(plain_password, hashed_password):
 
 def get_password_hash(password):
     return pwd_context.hash(password)
+
+
+def generate_password():
+    caracteres = string.ascii_letters + string.digits
+    return ''.join(random.choices(caracteres, k=10))
 
 
 def authenticate_user(username: str,

@@ -101,7 +101,8 @@ CREATE TABLE Usuario (
     usuario_insercion INT NOT NULL,
     usuario_modificacion INT NULL,
     FOREIGN KEY (rol_id) REFERENCES Rol(rol_id),
-    FOREIGN KEY (cliente_id) REFERENCES Cliente(cliente_id)
+    FOREIGN KEY (cliente_id) REFERENCES Cliente(cliente_id),
+    UNIQUE(correo)
 );
 
 CREATE TABLE Campania (
