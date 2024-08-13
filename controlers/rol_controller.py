@@ -87,6 +87,26 @@ def read_rol(current_user: Annotated[Usuario, Security(get_current_active_user)]
             raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.get("/roles/bydesc/{descripcion}", response_model=Rol)
+def read_rol_by_desc(
+             descripcion: str,
+             db: Session = Depends(get_db)):
+    try:
+        rol = db.query(RolRepo).\
+            filter(RolRepo.descripcion == descripcion,
+                   RolRepo.estado == ESTADO_ACTIVO).\
+            first()
+
+        if not rol:
+            raise HTTPException(status_code=404, detail="Rol no encontrado")
+        return rol
+    except Exception as e:
+        if type(e) is HTTPException:
+            raise e
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.get("/roles", response_model=List[Rol])
 def read_rols(current_user: Annotated[Usuario, Security(
                 get_current_active_user)],

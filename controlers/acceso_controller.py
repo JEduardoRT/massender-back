@@ -87,18 +87,42 @@ def read_accesos(
 def read_accesos_by_rol(
             current_user: Annotated[Usuario, Security(get_current_active_user)],
             rol_id: int,
-            skip: int = 0,
-            limit: int = 10,
             db: Session = Depends(get_db)):
+
     try:
         accesos = db.query(AccesoRepo).\
             join(AccesoRolRepo).\
             filter(AccesoRolRepo.rol_id == rol_id,
                    AccesoRepo.estado == ESTADO_ACTIVO).\
-            offset(skip).limit(limit).\
             all()
 
-        return accesos
+        accesosModel: List[Acceso] = []
+        for acceso in accesos:
+            accesoModel = Acceso(
+                acceso_id=acceso.acceso_id,
+                ruta=acceso.ruta,
+                descripcion=acceso.descripcion,
+                parent_id=acceso.parent_id,
+                estado=acceso.estado,
+                fecha_insercion=acceso.fecha_insercion,
+                usuario_insercion=acceso.usuario_insercion,
+                fecha_modificacion=acceso.fecha_modificacion,
+                usuario_modificacion=acceso.usuario_modificacion
+            )
+            accesosModel.append(accesoModel)
+
+        accesos_dict = {acceso.acceso_id: acceso for acceso in accesosModel}
+
+        for acceso in accesos:
+            if acceso.parent_id is not None and acceso.parent_id in accesos_dict:
+                parent = accesos_dict[acceso.parent_id]
+                if parent.children is None:
+                    parent.children = []
+                parent.children.append(acceso)
+
+        accesos_filtrados = [acceso for acceso in accesosModel if acceso.parent_id is None]
+
+        return accesos_filtrados
     except Exception as e:
         if type(e) is HTTPException:
             raise e
