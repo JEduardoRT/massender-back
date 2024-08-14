@@ -7,9 +7,10 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-def enviar_sms_masivo(numeros_telefonos, nombre_campania):
+def enviar_sms(numeros_telefonos, nombre_campania):
 
     for numero_telefono in numeros_telefonos:
+        logger.info(numero_telefono)
         url = "https://api.massend.com/api/sms"
 
         # Construcción del payload
@@ -29,7 +30,6 @@ def enviar_sms_masivo(numeros_telefonos, nombre_campania):
 
         response = requests.request("POST", url, headers=headers, data=payload)
         logger.info(response)
-
-        return response.text
+        logger.info(response.text)
 
 

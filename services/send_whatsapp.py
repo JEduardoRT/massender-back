@@ -6,9 +6,9 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def enviar_mensaje_whatsapp(destinatarios, mensaje):
-    access_token = 'EAA4BSeIrXxYBO4U4XWkE9LQzzvynfdoRAoyOmPDLBCQa6Ed32AoLadZCuGCZBx8Phcf1xjDmZBzi0aIlsZBjyeDAZBoyyFGsPZCtYWQTRhe8FsNf5vrciQY59bCLZByVpOGD2XMtFARXElvM15dnu2vvZBEf7DMNBQEp93DMjwZB7lkl2Sepqpp7SVIT3OqHfOsaEyObOGYqB8DuhzDzppo4ZD'
-    phone_number_id = '330293983510087'
+def enviar_mensaje_whatsapp(destinatarios, asunto, mensaje):
+    access_token = 'EAB0PZCKUthjIBOz43ffxl8N4SNZBKBroIeUq7mpZBqwDF5NkIzZCL2ErQWsBRlxw0FzqXObkZBH3UyZAQYyqEf0QQ6AkttYiCfwtq4fyYGBZBDLeCdidaebelFoHXPMqdBDZBPShE7ptEE6uJnAaE3fnzoGpmZAoDDFnZCvA7HbZCShCPBp6CZCxdkI1vs7CHIktWZCAdsHcER8ZCWpFvfLZCJEz28ZD'
+    phone_number_id = '377344268801407'
 
     url = f'https://graph.facebook.com/v20.0/{phone_number_id}/messages'
 
@@ -27,27 +27,23 @@ def enviar_mensaje_whatsapp(destinatarios, mensaje):
     for destinatario in destinatarios:
         numero_formateado = formatear_numero(destinatario)
         payload = {
-            "messaging_product": "whatsapp",
-            "to": numero_formateado,
-            "type": 'text',
-            "text": {
-                "body": mensaje
+            'messaging_product': 'whatsapp',
+            'to': numero_formateado,
+            'type': 'template',
+            'template': {
+                'name': 'hello_world',  # Nombre de la plantilla
+                'language': {
+                    'code': 'en_US'
+                }
             }
         }
 
-        logger.info(f"Enviando mensaje a {numero_formateado} con payload: {payload}")
         response = requests.post(url, headers=headers, data=json.dumps(payload))
         response_data = response.json()
 
         if response.status_code == 200:
             logger.info(f"Mensaje enviado exitosamente a {numero_formateado}")
-            logger.info(f"Respuesta de la API: {response_data}")
+            logger.info("Respuesta de la API:", response_data)
         else:
-            logger.error(f"Error al enviar el mensaje a {numero_formateado}: {response_data}")
-            logger.error(f"Código de estado: {response.status_code}")
-
-# Ejemplo de uso
-destinatarios = ['0987615981', '0998645309']
-mensaje = "Este es un mensaje de prueba personalizado."
-
-enviar_mensaje_whatsapp(destinatarios, mensaje)
+            logger.info(f"Error al enviar el mensaje a {numero_formateado}: {response_data}")
+            logger.info("Código de estado:", response.status_code)
